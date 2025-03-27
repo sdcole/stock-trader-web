@@ -1,9 +1,28 @@
 #root {
-  max-width: 1280px;
+  max-width: 100%;
+  width: 90%;
   margin: 0 auto;
   padding: 2rem;
   text-align: center;
+}
 
+@media (max-width: 768px) {
+  #root {
+    padding: 1rem;
+  }
+  .logo {
+    height: 4em;
+    padding: 1em;
+  }
+  h1 {
+    font-size: 2em;
+  }
+  .card {
+    padding: 1.5em;
+  }
+  button {
+    padding: 0.5em 1em;
+  }
 }
 .component-container {
   
@@ -21,20 +40,7 @@
   filter: drop-shadow(0 0 2em #61dafbaa);
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
-}
 
 .card {
   padding: 2em;

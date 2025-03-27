@@ -1,39 +1,65 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { LineChart } from "@mui/x-charts/LineChart";
-import { TextField, Button, Box, Typography, Paper } from "@mui/material";
+import { CircularProgress, Button, Box, Typography, Paper } from "@mui/material";
 
-const StockChart = ({ticker}) => {
-    const [data, setData] = useState([]);
-    const [error, setError] = useState(null);
-    const [timeFrame, setTimeFrame] = useState("1d");
-    const [chartLabel, setChartLabel] = useState("");
-    const [chartLineColor, setChartLineColor] = useState("#48E5C2");
+// Define the structure of stock data
+interface StockData {
+    x: string;
+    y: number;
+}
+
+// Define props for StockChart
+interface StockChartProps {
+    ticker: string;
+    isMobile: boolean;
+}
+
+const StockChart: React.FC<StockChartProps> = ({ ticker, isMobile }) => {
+    const [data, setData] = useState<StockData[]>([]);
+    const [error, setError] = useState<string | null>(null);
+    const [loading, setLoading] = useState<boolean>(false);
+    const [timeFrame, setTimeFrame] = useState<string>("1d");
+    const [chartLabel, setChartLabel] = useState<string>("");
+    const [chartLineColor] = useState<string>("#48E5C2");
+
+    // Theme and media query for responsivenes.
+    const chartWidth = isMobile ? 400 : 600;
+    const chartHeight = isMobile ? 200 : 300;
+
     useEffect(() => {
         fetchStockData(timeFrame);
     }, [timeFrame, ticker]);
 
-    const fetchStockData = async (selectedTimeFrame) => {
+    const fetchStockData = async (selectedTimeFrame: string) => {
+        setLoading(true);
         try {
             setChartLabel(ticker);
             setError(null);
             setTimeFrame(selectedTimeFrame);
-            const response = await axios.get("http://localhost:5120/v1/line-graph", {
-                params: { ticker, timeframe: selectedTimeFrame }
+
+            const response = await axios.get<StockData[]>("https://trade.meshservice.work/api/trade/v1/line-graph", {
+                params: { ticker, timeframe: selectedTimeFrame },
             });
 
             if (response.data && Array.isArray(response.data)) {
-                const transformedData = response.data.map(bar => ({
-                    x: new Date(bar.timestamp).toLocaleDateString(),
-                    y: bar.vw
+                const transformedData: StockData[] = response.data.map((bar: any) => ({
+                    x: selectedTimeFrame === "1d" || selectedTimeFrame === "7d" || selectedTimeFrame === "1m" || selectedTimeFrame === "3m"
+                        ? new Date(bar.timestamp).toLocaleString()
+                        : new Date(bar.timestamp).toLocaleDateString(),
+                    y: bar.vw as number,
                 }));
+
                 setData(transformedData);
+                console.log(transformedData);
             } else {
                 setError("No data available for the specified ticker.");
             }
         } catch (err) {
             setError("Error fetching data. Check the ticker or try again.");
             console.error(err);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -43,10 +69,8 @@ const StockChart = ({ticker}) => {
                 Stock Price Chart
             </Typography>
 
-            
-
             {/* Time Frame Buttons */}
-            <Box sx={{ display: "flex", justifyContent: "center", gap: 1, mb: 2 }}>
+            <Box sx={{ display: "flex", justifyContent: "center", gap: 1, mb: 2, flexWrap: "wrap" }}>
                 {["1d", "7d", "1m", "3m", "6m", "1y"].map((frame) => (
                     <Button
                         key={frame}
@@ -56,10 +80,10 @@ const StockChart = ({ticker}) => {
                         sx={{ minWidth: 80 }}
                     >
                         {frame === "1d" ? "1 Day" :
-                         frame === "7d" ? "7 Days" :
-                         frame === "1m" ? "1 Month" :
-                         frame === "3m" ? "3 Months" :
-                         frame === "6m" ? "6 Months" : "1 Year"}
+                            frame === "7d" ? "7 Days" :
+                                frame === "1m" ? "1 Month" :
+                                    frame === "3m" ? "3 Months" :
+                                        frame === "6m" ? "6 Months" : "1 Year"}
                     </Button>
                 ))}
             </Box>
@@ -67,15 +91,23 @@ const StockChart = ({ticker}) => {
             {/* Error Message */}
             {error && <Typography color="error">{error}</Typography>}
 
+            {/* Loading Spinner */}
+            {loading && (
+                <Box sx={{ display: "flex", justifyContent: "center", my: 3 }}>
+                    <CircularProgress color="primary" />
+                </Box>
+            )}
+
             {/* Line Chart */}
-            {data.length > 0 && (
-                <LineChart
-                    xAxis={[{ data: data.map(d => d.x), scaleType: "point" }]}
-                    series={[{ data: data.map(d => d.y), label: chartLabel, color: chartLineColor, showMark: false }]}
-                    width={600}
-                    height={300}
-                    
-                />
+            {!loading && data.length > 0 && (
+                <Box sx={{ width: "100%", overflowX: "auto" }}>
+                    <LineChart
+                        xAxis={[{ data: data.map((d) => d.x), scaleType: "point" }]}
+                        series={[{ data: data.map((d) => d.y), label: chartLabel, color: chartLineColor, showMark: false }]}
+                        width={chartWidth}
+                        height={chartHeight}
+                    />
+                </Box>
             )}
         </Paper>
     );

@@ -3,15 +3,35 @@ import { DataGrid } from "@mui/x-data-grid";
 import { Container, Typography, Paper, TextField } from "@mui/material";
 import axios from "axios";
 
-const CompanyDataGrid = ({ setSelectedTicker }) => {
-  const [companies, setCompanies] = useState([]);
-  const [loading, setLoading] = useState(true);
+interface Company {
+  ticker: string;
+  companyDescription: string;
+  sector: string;
+}
+
+interface Props {
+  setSelectedTicker: (ticker: string) => void;
+  isMobile: boolean;
+}
+
+const CompanyDataGrid: React.FC<Props> = ({ setSelectedTicker, isMobile }) => {
+  const [companies, setCompanies] = useState<Company[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
   const [paginationModel, setPaginationModel] = useState({ pageSize: 5, page: 0 });
-  const [searchText, setSearchText] = useState(""); // Search input state
+  const [searchText, setSearchText] = useState<string>(""); // Search input state
+  const [selectedRow, setSelectedRow] = useState<string | null>(null); // Selected row for highlighting
+  const [rowHeight, setRowHeight] = useState<number>(50);
 
   useEffect(() => {
+    // Adjust row height based on mobile screen size
+    if (isMobile) {
+      setRowHeight(25); // Smaller height for mobile
+    } else {
+      setRowHeight(50); // Default height for desktop
+    }
+
     axios
-      .get("http://localhost:5119/v1/companies")
+      .get("https://trade.meshservice.work/api/trade/v1/data-grid")
       .then((response) => {
         setCompanies(response.data);
         setLoading(false);
@@ -20,7 +40,7 @@ const CompanyDataGrid = ({ setSelectedTicker }) => {
         console.error("Error fetching companies:", error);
         setLoading(false);
       });
-  }, []);
+  }, [isMobile]); // Re-run effect when isMobile changes
 
   const columns = [
     { field: "ticker", headerName: "Ticker", width: 150 },
@@ -36,10 +56,12 @@ const CompanyDataGrid = ({ setSelectedTicker }) => {
       company.sector.toLowerCase().includes(searchText.toLowerCase())
   );
 
-  // Handle Enter key to select first matching row
-  const handleKeyPress = (event) => {
+  // Handle Enter key to select and highlight the first matching row
+  const handleKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === "Enter" && filteredCompanies.length > 0) {
-      setSelectedTicker(filteredCompanies[0].ticker);
+      const selectedTicker = filteredCompanies[0].ticker;
+      setSelectedTicker(selectedTicker);
+      setSelectedRow(selectedTicker);
     }
   };
 
@@ -70,35 +92,26 @@ const CompanyDataGrid = ({ setSelectedTicker }) => {
             paginationModel={paginationModel}
             onPaginationModelChange={setPaginationModel}
             getRowId={(row) => row.ticker}
-            onRowClick={(params) => setSelectedTicker(params.row.ticker)}
+            onRowClick={(params) => {
+              setSelectedTicker(params.row.ticker);
+              setSelectedRow(params.row.ticker);
+            }}
+            rowSelectionModel={selectedRow ? [selectedRow] : []} // Highlight selected row
+            rowHeight={rowHeight} // Apply dynamic row height
             sx={{
-              "& .MuiDataGrid-sortIcon": {
-              color: "#48E5C2", // Sorting icon
-            },
-            "& .MuiDataGrid-menuIconButton": {
-              color: "#48E5C2", // Column menu (3-dot icon)
-            },
-            "& .MuiDataGrid-filterIcon": {
-              color: "#48E5C2", // Filter icon
-            },
-            "& .MuiDataGrid-iconSeparator": {
-              color: "#48E5C2", // Separator line
-            },
-            "& .MuiPaginationItem-root": {
-              color: "#48E5C2", // Pagination buttons
-            },
-            "& .MuiDataGrid-columnHeaders": {
-              backgroundColor: "#48E5C2", // Column header background
-            },
-            "& .MuiTablePagination-select": {
-            color: "#48E5C2", // Text color of the dropdown
-          },
-          "& .MuiTablePagination-selectIcon": {
-            color: "#48E5C2", // Icon color of the dropdown
-          },
-          "& .MuiTablePagination-displayedRows": {
-            color: "#48E5C2", // Color of the displayed rows text
-          },
+              "& .MuiDataGrid-sortIcon": { color: "#48E5C2" },
+              "& .MuiDataGrid-menuIconButton": { color: "#48E5C2" },
+              "& .MuiDataGrid-filterIcon": { color: "#48E5C2" },
+              "& .MuiDataGrid-iconSeparator": { color: "#48E5C2" },
+              "& .MuiPaginationItem-root": { color: "#48E5C2" },
+              "& .MuiDataGrid-columnHeaders": { backgroundColor: "#48E5C2" },
+              "& .MuiTablePagination-select": { color: "#48E5C2" },
+              "& .MuiTablePagination-selectIcon": { color: "#48E5C2" },
+              "& .MuiTablePagination-displayedRows": { color: "#48E5C2" },
+              "& .Mui-selected": {
+                backgroundColor: "#DA2C38 !important", // Highlight selected row
+                color: "white",
+              },
             }}
           />
         </div>

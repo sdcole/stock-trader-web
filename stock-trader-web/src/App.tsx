@@ -1,20 +1,33 @@
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import './App.css'
 import StockChart from './StockChart';
 import CompanyDataGrid from './CompanyDataGrid';
-import React, { useEffect, useState } from "react";
-import axios from "axios";
-import { LineChart } from "@mui/x-charts/LineChart";
-import { TextField, Button, Box, Typography, Paper, ThemeProvider } from "@mui/material";
+import { useState, useEffect } from "react";
+import { ThemeProvider } from "@mui/material";
 import theme from './theme';
+import PopupOnLoad from './PopupOnLoad';
 
 function App() {
-  const [count, setCount] = useState(0)
 
   const [selectedTicker, setSelectedTicker] = useState("AAPL")
+  const [isMobile, setIsMobile] = useState<boolean>(false);
 
+  useEffect(() => {
+    const checkMobile = () => {
+      // If the window width is less than 600px, it's considered mobile
+      setIsMobile(window.innerWidth <= 800);
+    };
 
+    // Check on mount
+    checkMobile();
+
+    // Add resize event listener to update on screen resize
+    window.addEventListener("resize", checkMobile);
+
+    // Clean up the event listener
+    return () => {
+      window.removeEventListener("resize", checkMobile);
+    };
+  }, []);
 
   return (
     <ThemeProvider theme={theme}>
@@ -22,9 +35,14 @@ function App() {
       </div>
       <h1>Stock Monitor</h1>
       <CompanyDataGrid
-      setSelectedTicker={setSelectedTicker}/>
+      setSelectedTicker={setSelectedTicker}
+      isMobile={isMobile}
+      />
       <StockChart
-      ticker={selectedTicker}/>
+      ticker={selectedTicker}
+      isMobile={isMobile}
+      />
+      <PopupOnLoad/>
     </ThemeProvider>
   )
 }
