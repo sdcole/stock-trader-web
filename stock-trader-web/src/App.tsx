@@ -2,7 +2,7 @@ import './App.css'
 import StockChart from './StockChart';
 import CompanyDataGrid from './CompanyDataGrid';
 import { useState, useEffect } from "react";
-import { ThemeProvider } from "@mui/material";
+import { ThemeProvider, Container } from "@mui/material";
 import theme from './theme';
 import PopupOnLoad from './PopupOnLoad';
 
@@ -31,9 +31,19 @@ function App() {
 
   return (
     <ThemeProvider theme={theme}>
-      <div>
-      </div>
+      <Container
+      maxWidth="lg"
+      sx={{
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        height: "100vh", // Center vertically in the viewport
+        flexDirection: "column",
+        textAlign: "center", // Center the text inside the components
+      }}
+    >
       <h1>Stock Monitor</h1>
+
       <CompanyDataGrid
       setSelectedTicker={setSelectedTicker}
       isMobile={isMobile}
@@ -42,7 +52,9 @@ function App() {
       ticker={selectedTicker}
       isMobile={isMobile}
       />
+
       <PopupOnLoad/>
+      </Container>
     </ThemeProvider>
   )
 }
