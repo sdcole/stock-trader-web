@@ -44,7 +44,7 @@ const StockChart: React.FC<StockChartProps> = ({ ticker, isMobile }) => {
 
             if (response.data && Array.isArray(response.data)) {
                 const transformedData: StockData[] = response.data.map((bar: any) => ({
-                    x: selectedTimeFrame === "1d" || selectedTimeFrame === "7d" || selectedTimeFrame === "1m" || selectedTimeFrame === "3m" || selectedTimeFrame === "6m"
+                    x: selectedTimeFrame === "1d" || selectedTimeFrame === "7d" || selectedTimeFrame === "1m" || selectedTimeFrame === "3m"
                         ? new Date(bar.timestamp).toLocaleString()
                         : new Date(bar.timestamp).toLocaleDateString(),
                     y: bar.vw as number,
