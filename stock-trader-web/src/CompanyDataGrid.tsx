@@ -66,7 +66,6 @@ const CompanyDataGrid: React.FC<Props> = ({ setSelectedTicker, isMobile }) => {
   };
 
   return (
-    <Container maxWidth="md" sx={{ mt: 4 }}>
             <Paper sx={{ width: "100%", p: 3, borderRadius: 3 }}>
         <Typography variant="h5" color="primary" gutterBottom>
           NYSE Companies
@@ -116,7 +115,6 @@ const CompanyDataGrid: React.FC<Props> = ({ setSelectedTicker, isMobile }) => {
           />
         </div>
       </Paper>
-    </Container>
   );
 };
 

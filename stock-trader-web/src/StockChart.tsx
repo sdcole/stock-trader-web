@@ -24,8 +24,8 @@ const StockChart: React.FC<StockChartProps> = ({ ticker, isMobile }) => {
     const [chartLineColor] = useState<string>("#48E5C2");
 
     // Theme and media query for responsiveness.
-    const chartWidth = isMobile ? 350 : 600
-    const chartHeight = isMobile ? 200 : 300;
+    const chartWidth = isMobile ? 450 : 650
+    const chartHeight = isMobile ? 300 : 300;
 
     useEffect(() => {
         fetchStockData(timeFrame);
@@ -64,8 +64,7 @@ const StockChart: React.FC<StockChartProps> = ({ ticker, isMobile }) => {
     };
 
     return (
-        <Container maxWidth="md" sx={{ mt: 4 }}>
-            <Paper sx={{ width: "100%", p: 3, borderRadius: 3 }}>
+            <Paper sx={{ width: "100%", p: 3, borderRadius: 3, mt: 3 }}>
                 <Typography variant="h5" color="primary" gutterBottom>
                     Stock Price Chart
                 </Typography>
@@ -111,7 +110,6 @@ const StockChart: React.FC<StockChartProps> = ({ ticker, isMobile }) => {
                     </Box>
                 )}
             </Paper>
-        </Container>
     );
 };
 
