@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { LineChart } from "@mui/x-charts/LineChart";
-import { CircularProgress, Button, Box, Typography, Paper, Container } from "@mui/material";
+import { CircularProgress, Button, Box, Typography, Paper } from "@mui/material";
 
 // Define the structure of stock data
 interface StockData {

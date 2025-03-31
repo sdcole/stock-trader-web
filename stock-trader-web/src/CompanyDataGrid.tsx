@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { DataGrid } from "@mui/x-data-grid";
-import { Container, Typography, Paper, TextField } from "@mui/material";
+import { Typography, Paper, TextField } from "@mui/material";
 import axios from "axios";
 
 interface Company {
