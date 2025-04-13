@@ -11,11 +11,11 @@ interface StockData {
 
 // Define props for StockChart
 interface StockChartProps {
-    ticker: string;
+    symbol: string;
     isMobile: boolean;
 }
 
-const StockChart: React.FC<StockChartProps> = ({ ticker, isMobile }) => {
+const StockChart: React.FC<StockChartProps> = ({ symbol, isMobile }) => {
     const [data, setData] = useState<StockData[]>([]);
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
@@ -29,17 +29,17 @@ const StockChart: React.FC<StockChartProps> = ({ ticker, isMobile }) => {
 
     useEffect(() => {
         fetchStockData(timeFrame);
-    }, [timeFrame, ticker]);
+    }, [timeFrame, symbol]);
 
     const fetchStockData = async (selectedTimeFrame: string) => {
         setLoading(true);
         try {
-            setChartLabel(ticker);
+            setChartLabel(symbol);
             setError(null);
             setTimeFrame(selectedTimeFrame);
 
             const response = await axios.get<StockData[]>("https://trade.meshservice.work/api/trade/v1/line-graph", {
-                params: { ticker, timeframe: selectedTimeFrame },
+                params: { symbol, timeframe: selectedTimeFrame },
             });
 
             if (response.data && Array.isArray(response.data)) {
@@ -53,10 +53,10 @@ const StockChart: React.FC<StockChartProps> = ({ ticker, isMobile }) => {
                 setData(transformedData);
                 console.log(transformedData);
             } else {
-                setError("No data available for the specified ticker.");
+                setError("No data available for the specified symbol.");
             }
         } catch (err) {
-            setError("Error fetching data. Check the ticker or try again.");
+            setError("Error fetching data. Check the symbol or try again.");
             console.error(err);
         } finally {
             setLoading(false);

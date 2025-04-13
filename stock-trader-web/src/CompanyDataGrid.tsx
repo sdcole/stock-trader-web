@@ -4,17 +4,17 @@ import { Typography, Paper, TextField } from "@mui/material";
 import axios from "axios";
 
 interface Company {
-  ticker: string;
+  symbol: string;
   companyDescription: string;
   sector: string;
 }
 
 interface Props {
-  setSelectedTicker: (ticker: string) => void;
+  setSelectedSymbol: (ticker: string) => void;
   isMobile: boolean;
 }
 
-const CompanyDataGrid: React.FC<Props> = ({ setSelectedTicker, isMobile }) => {
+const CompanyDataGrid: React.FC<Props> = ({ setSelectedSymbol, isMobile }) => {
   const [companies, setCompanies] = useState<Company[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [paginationModel, setPaginationModel] = useState({ pageSize: 5, page: 0 });
@@ -43,7 +43,7 @@ const CompanyDataGrid: React.FC<Props> = ({ setSelectedTicker, isMobile }) => {
   }, [isMobile]); // Re-run effect when isMobile changes
 
   const columns = [
-    { field: "ticker", headerName: "Ticker", width: 150 },
+    { field: "symbol", headerName: "Symbol", width: 150 },
     { field: "companyDescription", headerName: "Company Name", width: 300 },
     { field: "sector", headerName: "Sector", width: 200 },
   ];
@@ -51,7 +51,7 @@ const CompanyDataGrid: React.FC<Props> = ({ setSelectedTicker, isMobile }) => {
   // Filter companies based on search text
   const filteredCompanies = companies.filter(
     (company) =>
-      company.ticker.toLowerCase().includes(searchText.toLowerCase()) ||
+      company.symbol.toLowerCase().includes(searchText.toLowerCase()) ||
       company.companyDescription.toLowerCase().includes(searchText.toLowerCase()) ||
       company.sector.toLowerCase().includes(searchText.toLowerCase())
   );
@@ -59,9 +59,9 @@ const CompanyDataGrid: React.FC<Props> = ({ setSelectedTicker, isMobile }) => {
   // Handle Enter key to select and highlight the first matching row
   const handleKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === "Enter" && filteredCompanies.length > 0) {
-      const selectedTicker = filteredCompanies[0].ticker;
-      setSelectedTicker(selectedTicker);
-      setSelectedRow(selectedTicker);
+      const selectedSymbol = filteredCompanies[0].symbol;
+      setSelectedSymbol(selectedSymbol);
+      setSelectedRow(selectedSymbol);
     }
   };
 
@@ -90,9 +90,9 @@ const CompanyDataGrid: React.FC<Props> = ({ setSelectedTicker, isMobile }) => {
             pageSizeOptions={[5, 10, 20]}
             paginationModel={paginationModel}
             onPaginationModelChange={setPaginationModel}
-            getRowId={(row) => row.ticker}
+            getRowId={(row) => row.symbol}
             onRowClick={(params) => {
-              setSelectedTicker(params.row.ticker);
+              setSelectedSymbol(params.row.symbol);
               setSelectedRow(params.row.ticker);
             }}
             rowSelectionModel={selectedRow ? [selectedRow] : []} // Highlight selected row

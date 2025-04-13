@@ -8,7 +8,7 @@ import PopupOnLoad from './PopupOnLoad';
 
 function App() {
 
-  const [selectedTicker, setSelectedTicker] = useState("AAPL")
+  const [selectedSymbol, setSelectedSymbol] = useState("AAPL")
   const [isMobile, setIsMobile] = useState<boolean>(false);
 
   useEffect(() => {
@@ -32,7 +32,7 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <Container
-      maxWidth="lg"
+      maxWidth="md"
       sx={{
         display: "flex",
         justifyContent: "center",
@@ -45,11 +45,11 @@ function App() {
       <h1>Stock Monitor</h1>
 
       <CompanyDataGrid
-      setSelectedTicker={setSelectedTicker}
+      setSelectedSymbol={setSelectedSymbol}
       isMobile={isMobile}
       />
       <StockChart
-      ticker={selectedTicker}
+      symbol={selectedSymbol}
       isMobile={isMobile}
       />
 
