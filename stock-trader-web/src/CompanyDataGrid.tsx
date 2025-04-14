@@ -10,7 +10,7 @@ interface Company {
 }
 
 interface Props {
-  setSelectedSymbol: (ticker: string) => void;
+  setSelectedSymbol: (symbol: string) => void;
   isMobile: boolean;
 }
 
@@ -93,7 +93,7 @@ const CompanyDataGrid: React.FC<Props> = ({ setSelectedSymbol, isMobile }) => {
             getRowId={(row) => row.symbol}
             onRowClick={(params) => {
               setSelectedSymbol(params.row.symbol);
-              setSelectedRow(params.row.ticker);
+              setSelectedRow(params.row.symbol);
             }}
             rowSelectionModel={selectedRow ? [selectedRow] : []} // Highlight selected row
             rowHeight={rowHeight} // Apply dynamic row height
