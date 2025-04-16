@@ -19,7 +19,7 @@ const StockChart: React.FC<StockChartProps> = ({ symbol, isMobile }) => {
     const [data, setData] = useState<StockData[]>([]);
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
-    const [timeFrame, setTimeFrame] = useState<string>("1d");
+    const [timeFrame, setTimeFrame] = useState<string>("7d");
     const [chartLabel, setChartLabel] = useState<string>("");
     const [chartLineColor] = useState<string>("#48E5C2");
 
@@ -71,7 +71,7 @@ const StockChart: React.FC<StockChartProps> = ({ symbol, isMobile }) => {
 
                 {/* Time Frame Buttons */}
                 <Box sx={{ display: "flex", justifyContent: "center", gap: 1, mb: 2, flexWrap: "wrap" }}>
-                    {["1d", "7d", "1m", "3m", "6m", "1y"].map((frame) => (
+                    {["1d", "7d", "1m", "3m", "6m", "1y", "5y"].map((frame) => (
                         <Button
                             key={frame}
                             variant={timeFrame === frame ? "contained" : "outlined"}
@@ -83,7 +83,9 @@ const StockChart: React.FC<StockChartProps> = ({ symbol, isMobile }) => {
                                 frame === "7d" ? "7 Days" :
                                     frame === "1m" ? "1 Month" :
                                         frame === "3m" ? "3 Months" :
-                                            frame === "6m" ? "6 Months" : "1 Year"}
+                                            frame === "6m" ? "6 Months" :
+                                                frame === "" ? "1 Year": "5 Years"
+                                                }
                         </Button>
                     ))}
                 </Box>
