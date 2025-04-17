@@ -84,7 +84,7 @@ const StockChart: React.FC<StockChartProps> = ({ symbol, isMobile }) => {
                                     frame === "1m" ? "1 Month" :
                                         frame === "3m" ? "3 Months" :
                                             frame === "6m" ? "6 Months" :
-                                                frame === "" ? "1 Year": "5 Years"
+                                                frame === "1y" ? "1 Year": "5 Years"
                                                 }
                         </Button>
                     ))}
