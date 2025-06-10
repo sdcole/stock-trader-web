@@ -21,7 +21,7 @@ const StockChart: React.FC<StockChartProps> = ({ symbol, isMobile }) => {
     const [loading, setLoading] = useState<boolean>(false);
     const [timeFrame, setTimeFrame] = useState<string>("7d");
     const [chartLabel, setChartLabel] = useState<string>("");
-    const [chartLineColor] = useState<string>("#48E5C2");
+    const [chartLineColor, setChartLineColor] = useState<string>("#48E5C2");
 
     // Theme and media query for responsiveness.
     const chartWidth = isMobile ? 450 : 650
@@ -51,6 +51,12 @@ const StockChart: React.FC<StockChartProps> = ({ symbol, isMobile }) => {
                 }));
 
                 setData(transformedData);
+                if (transformedData[0].y <= transformedData[transformedData.length-1].y) {
+                    setChartLineColor("#48E5C2");
+                }
+                else {
+                    setChartLineColor("#DA2C38");
+                }
                 console.log(transformedData);
             } else {
                 setError("No data available for the specified symbol.");
