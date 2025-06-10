@@ -44,14 +44,15 @@ function App() {
     >
       <h1>Stock Monitor</h1>
 
-      <CompanyDataGrid
-      setSelectedSymbol={setSelectedSymbol}
-      isMobile={isMobile}
-      />
       <StockChart
       symbol={selectedSymbol}
       isMobile={isMobile}
       />
+      <CompanyDataGrid
+      setSelectedSymbol={setSelectedSymbol}
+      isMobile={isMobile}
+      />
+      
 
       <PopupOnLoad/>
       </Container>
