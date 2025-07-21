@@ -1,5 +1,6 @@
 import './App.css'
 import StockChart from './StockChart';
+import AskAI from './AskAI';
 import CompanyDataGrid from './CompanyDataGrid';
 import { useState, useEffect } from "react";
 import { ThemeProvider, Container } from "@mui/material";
@@ -48,6 +49,7 @@ function App() {
       symbol={selectedSymbol}
       isMobile={isMobile}
       />
+      <AskAI symbol={selectedSymbol} />
       <CompanyDataGrid
       setSelectedSymbol={setSelectedSymbol}
       isMobile={isMobile}
