@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { DataGrid } from "@mui/x-data-grid";
-import { Typography, Paper, TextField } from "@mui/material";
+import { Typography, Paper, TextField, Box } from "@mui/material";
 import axios from "axios";
 
 interface Company {
@@ -12,9 +12,10 @@ interface Company {
 interface Props {
   setSelectedSymbol: (symbol: string) => void;
   isMobile: boolean;
+  selectedSymbol?: string;
 }
 
-const CompanyDataGrid: React.FC<Props> = ({ setSelectedSymbol, isMobile }) => {
+const CompanyDataGrid: React.FC<Props> = ({ setSelectedSymbol, isMobile, selectedSymbol }) => {
   const [companies, setCompanies] = useState<Company[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [paginationModel, setPaginationModel] = useState({ pageSize: 5, page: 0 });
@@ -43,9 +44,8 @@ const CompanyDataGrid: React.FC<Props> = ({ setSelectedSymbol, isMobile }) => {
   }, [isMobile]); // Re-run effect when isMobile changes
 
   const columns = [
-    { field: "symbol", headerName: "Symbol", width: 150 },
-    { field: "companyDescription", headerName: "Company Name", width: 300 },
-    { field: "sector", headerName: "Sector", width: 200 },
+    { field: "symbol", headerName: "Symbol", width: 75 },
+    { field: "companyDescription", headerName: "Company Name", width: 200 },
   ];
 
   // Filter companies based on search text
@@ -66,7 +66,7 @@ const CompanyDataGrid: React.FC<Props> = ({ setSelectedSymbol, isMobile }) => {
   };
 
   return (
-            <Paper sx={{ width: "100%", p: 3, borderRadius: 3 }}>
+    <Paper sx={{ width: 1, p: isMobile ? 1 : 2, borderRadius: 3, boxSizing: 'border-box', maxHeight: isMobile ? 350 : 500, height: '100%', display: 'flex', flexDirection: 'column' }}>
         <Typography variant="h5" color="primary" gutterBottom>
           NYSE Companies
         </Typography>
@@ -82,38 +82,47 @@ const CompanyDataGrid: React.FC<Props> = ({ setSelectedSymbol, isMobile }) => {
           onKeyPress={handleKeyPress} // Listen for Enter key
         />
 
-        <div style={{ display: "flex", flexDirection: "column" }}>
+        <Box sx={{ flex: 1, minHeight: 0 }}>
           <DataGrid
-            rows={filteredCompanies}
-            columns={columns}
-            loading={loading}
-            pageSizeOptions={[5, 10, 20]}
-            paginationModel={paginationModel}
-            onPaginationModelChange={setPaginationModel}
-            getRowId={(row) => row.symbol}
-            onRowClick={(params) => {
-              setSelectedSymbol(params.row.symbol);
-              setSelectedRow(params.row.symbol);
-            }}
-            rowSelectionModel={selectedRow ? [selectedRow] : []} // Highlight selected row
-            rowHeight={rowHeight} // Apply dynamic row height
-            sx={{
-              "& .MuiDataGrid-sortIcon": { color: "#48E5C2" },
-              "& .MuiDataGrid-menuIconButton": { color: "#48E5C2" },
-              "& .MuiDataGrid-filterIcon": { color: "#48E5C2" },
-              "& .MuiDataGrid-iconSeparator": { color: "#48E5C2" },
-              "& .MuiPaginationItem-root": { color: "#48E5C2" },
-              "& .MuiDataGrid-columnHeaders": { backgroundColor: "#48E5C2" },
-              "& .MuiTablePagination-select": { color: "#48E5C2" },
-              "& .MuiTablePagination-selectIcon": { color: "#48E5C2" },
-              "& .MuiTablePagination-displayedRows": { color: "#48E5C2" },
-              "& .Mui-selected": {
-                backgroundColor: "#DA2C38 !important", // Highlight selected row
-                color: "white",
-              },
-            }}
+              rows={filteredCompanies}
+              columns={columns}
+              loading={loading}
+              pageSizeOptions={[]}
+              paginationModel={paginationModel}
+              onPaginationModelChange={setPaginationModel}
+              getRowId={(row) => row.symbol}
+              onRowClick={(params) => {
+                setSelectedSymbol(params.row.symbol);
+                setSelectedRow(params.row.symbol);
+              }}
+            rowSelectionModel={selectedRow ? [selectedRow] : selectedSymbol ? [selectedSymbol] : []} // Highlight selected row
+              rowHeight={rowHeight} // Apply dynamic row height
+              hideFooterSelectedRowCount
+              autoHeight={false}
+              sx={{
+                width: '100%',
+                height: '100%',
+                "& .MuiDataGrid-footerContainer": {
+                  width: '100%',
+                  minWidth: 0,
+                  overflowX: 'hidden',
+                },
+                "& .MuiDataGrid-sortIcon": { color: "#48E5C2" },
+                "& .MuiDataGrid-menuIconButton": { color: "#48E5C2" },
+                "& .MuiDataGrid-filterIcon": { color: "#48E5C2" },
+                "& .MuiDataGrid-iconSeparator": { color: "#48E5C2" },
+                "& .MuiPaginationItem-root": { color: "#48E5C2" },
+                "& .MuiDataGrid-columnHeaders": { backgroundColor: "#48E5C2" },
+                "& .MuiTablePagination-select": { color: "#48E5C2" },
+                "& .MuiTablePagination-selectIcon": { color: "#48E5C2" },
+                "& .MuiTablePagination-displayedRows": { color: "#48E5C2" },
+                "& .Mui-selected": {
+                  backgroundColor: "#DA2C38 !important", // Highlight selected row
+                  color: "white",
+                },
+              }}
           />
-        </div>
+        </Box>
       </Paper>
   );
 };
