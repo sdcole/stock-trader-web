@@ -24,7 +24,6 @@ const StockChart: React.FC<StockChartProps> = ({ symbol, isMobile }) => {
     const [chartLineColor, setChartLineColor] = useState<string>("#48E5C2");
 
     // Theme and media query for responsiveness.
-    const chartWidth = isMobile ? 450 : 650
     const chartHeight = isMobile ? 300 : 300;
 
     useEffect(() => {
@@ -70,7 +69,7 @@ const StockChart: React.FC<StockChartProps> = ({ symbol, isMobile }) => {
     };
 
     return (
-            <Paper sx={{ width: "100%", p: 3, borderRadius: 3, mt: 3 }}>
+            <Paper sx={{ width: "100%", p: 3, borderRadius: 3 }}>
                 <Typography variant="h5" color="primary" gutterBottom>
                     Stock Price Chart
                 </Typography>
@@ -108,12 +107,13 @@ const StockChart: React.FC<StockChartProps> = ({ symbol, isMobile }) => {
 
                 {/* Line Chart */}
                 {!loading && data.length > 0 && (
-                    <Box sx={{ width: "100%", overflowX: "none", display: "flex", justifyContent: "center" }}>
+                    <Box sx={{ width: '100%', overflowX: 'hidden', display: 'block' }}>
                         <LineChart
                             xAxis={[{ data: data.map((d) => d.x), scaleType: "point" }]}
                             series={[{ data: data.map((d) => d.y), label: chartLabel, color: chartLineColor, showMark: false }]}
-                            width={chartWidth}
+                            width={undefined}
                             height={chartHeight}
+                            sx={{ width: '100%' }}
                         />
                     </Box>
                 )}
