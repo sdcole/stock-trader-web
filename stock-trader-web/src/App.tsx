@@ -3,7 +3,7 @@ import StockChart from './StockChart';
 import AskAI from './AskAI';
 import CompanyDataGrid from './CompanyDataGrid';
 import { useState } from "react";
-import { ThemeProvider, Container, Box, Paper, useMediaQuery, Typography } from "@mui/material";
+import { ThemeProvider, Container, Box, Paper, useMediaQuery } from "@mui/material";
 import theme from './theme';
 import PopupOnLoad from './PopupOnLoad';
 
