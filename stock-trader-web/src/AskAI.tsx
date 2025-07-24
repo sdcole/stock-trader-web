@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import axios from "axios";
 import { Box, Button, CircularProgress, Typography, Paper, Stack } from "@mui/material";
 
 interface AskAIProps {
@@ -10,6 +11,12 @@ const AskAI: React.FC<AskAIProps> = ({ symbol }) => {
   const [response, setResponse] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  // Clear response and error when symbol changes
+  React.useEffect(() => {
+    setResponse(null);
+    setError(null);
+  }, [symbol]);
+
   const presetQuestions = [
     "Is the stock going up or down?",
     "Is this a stable stock?"
@@ -20,16 +27,17 @@ const AskAI: React.FC<AskAIProps> = ({ symbol }) => {
     setResponse(null);
     setError(null);
     try {
-      const res = await fetch("/api/ask-ai", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ symbol, question }),
-      });
-      if (!res.ok) throw new Error("Failed to get response");
-      const data = await res.json();
-      setResponse(data.answer || "No answer returned.");
+      const res = await axios.post(
+        "https://trade.meshservice.work/api/trade/v1/ask-ai",
+        {
+          Symbol: symbol,
+          RequestType: question
+        },
+        { timeout: 60000 } // 60 seconds timeout
+      );
+      setResponse(res.data.response || "No answer returned.");
     } catch (err: any) {
-      setError(err.message || "Error occurred");
+      setError(err.response?.data?.error || err.message || "Error occurred");
     } finally {
       setLoading(false);
     }
@@ -54,6 +62,11 @@ const AskAI: React.FC<AskAIProps> = ({ symbol }) => {
           ))}
           {loading && <CircularProgress size={24} sx={{ alignSelf: 'center' }} />}
         </Stack>
+        {loading && (
+          <Typography mt={2} color="text.secondary">
+            Analyzing all data for that symbol, this may take some time...
+          </Typography>
+        )}
         {response && (
           <Typography mt={2} color="primary">{response}</Typography>
         )}
