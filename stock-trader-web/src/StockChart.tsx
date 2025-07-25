@@ -24,7 +24,7 @@ const StockChart: React.FC<StockChartProps> = ({ symbol, isMobile }) => {
     const [chartLineColor, setChartLineColor] = useState<string>("#48E5C2");
 
     // Theme and media query for responsiveness.
-    const chartHeight = isMobile ? 200 : 300;
+    const chartHeight = isMobile ? 300 : 300;
 
     useEffect(() => {
         fetchStockData(timeFrame);
@@ -69,13 +69,13 @@ const StockChart: React.FC<StockChartProps> = ({ symbol, isMobile }) => {
     };
 
     return (
-            <Paper sx={{ width: "100%", p: isMobile ? 1 : 3, borderRadius: 3 }}>
-                <Typography variant={isMobile ? "subtitle1" : "h5"} color="primary" gutterBottom>
+            <Paper sx={{ width: "100%", p: 3, borderRadius: 3 }}>
+                <Typography variant="h5" color="primary" gutterBottom>
                     Stock Price Chart
                 </Typography>
 
                 {/* Time Frame Buttons */}
-                <Box sx={{ display: "flex", justifyContent: "center", gap: isMobile ? 0.5 : 1, mb: 2, flexWrap: "wrap" }}>
+                <Box sx={{ display: "flex", justifyContent: "center", gap: 1, mb: 2, flexWrap: "wrap" }}>
                     {["1d", "7d", "1m", "3m", "6m", "1y", "5y"].map((frame) => (
                         <Button
                             key={frame}
