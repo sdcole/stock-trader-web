@@ -8,6 +8,9 @@ Comes from background applications that are constantly pulling market data and l
 Web app <--> App API <--> DB API <--> DB
 
 ## Change Log
+- 1.2.0 Added AskAI and implemented UI bugfixes
+    - Added Ask AI component and integrated with AI backend.
+    - Made UI components work better with mobile.
 - 1.1.1 Added Button for 5 Year Chart
     - Added additional button for the 5 year stock lookup.
 - 1.1.0 Bug Fixes and minor updates

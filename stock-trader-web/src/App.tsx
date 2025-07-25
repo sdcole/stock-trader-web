@@ -18,8 +18,8 @@ function App() {
         <Box
           sx={{
             display: 'flex',
-            flexDirection: isMobile ? 'column' : 'row',
-            gap: isMobile ? 2 : 4,
+            flexDirection: { xs: 'column', md: 'row' },
+            gap: { xs: 2, md: 4 },
             alignItems: 'flex-start',
             justifyContent: 'center',
             minHeight: '100vh',
@@ -39,7 +39,7 @@ function App() {
               flexDirection: 'column',
             }}
           >
-            <Paper elevation={2} sx={{ p: isMobile ? 1 : 2.5, borderRadius: 3, width: '100%', height: '100%', display: 'flex', flexDirection: 'column', boxSizing: 'border-box', overflow: 'hidden' }}>
+            <Paper elevation={2} sx={{ p: isMobile ? 1 : 2.5, pb: isMobile ? 2 : 3, borderRadius: 3, width: '100%', height: '100%', display: 'flex', flexDirection: 'column', boxSizing: 'border-box', overflow: 'hidden' }}>
               <CompanyDataGrid setSelectedSymbol={setSelectedSymbol} isMobile={isMobile} selectedSymbol={selectedSymbol} />
             </Paper>
           </Box>
@@ -55,7 +55,6 @@ function App() {
             <Paper elevation={2} sx={{
               p: isMobile ? 1 : 2.5,
               mb: isMobile ? 2 : 0,
-              overflow: 'hidden',
               minWidth: 0,
               width: '100%',
               maxWidth: '100%',
@@ -63,21 +62,23 @@ function App() {
               boxSizing: 'border-box',
               display: 'flex',
               flexDirection: 'column',
+              overflow: 'visible',
+              maxHeight: 'none',
             }}>
               <Box sx={{
-                overflow: 'auto',
-                maxHeight: isMobile ? 600 : 900,
                 width: '100%',
                 maxWidth: '100%',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'stretch',
                 boxSizing: 'border-box',
+                overflow: 'visible',
+                maxHeight: 'none',
               }}>
-                <Box sx={{ flex: 1, width: '100%', minWidth: 0, maxWidth: '100%', overflowX: 'hidden', display: 'flex', flexDirection: 'column' }}>
+                <Box sx={{ flex: 1, width: '100%', minWidth: 0, maxWidth: '100%', overflowX: 'visible', display: 'flex', flexDirection: 'column' }}>
                   <StockChart symbol={selectedSymbol} isMobile={isMobile} />
                 </Box>
-                <Box sx={{ flex: 1, width: '100%', minWidth: 0, maxWidth: '100%', mt: 2, overflowX: 'hidden', display: 'flex', flexDirection: 'column' }}>
+                <Box sx={{ flex: 1, width: '100%', minWidth: 0, maxWidth: '100%', mt: 2, overflowX: 'visible', display: 'flex', flexDirection: 'column' }}>
                   <AskAI symbol={selectedSymbol} />
                 </Box>
               </Box>

@@ -44,18 +44,33 @@ const AskAI: React.FC<AskAIProps> = ({ symbol }) => {
   };
 
   return (
-    <Box mt={3} mb={2}>
-      <Paper elevation={2} sx={{ p: 2, borderRadius: 2 }}>
-        <Typography variant="subtitle1" mb={2}>
+    <Box mt={3} mb={2} sx={{ width: '100%' }}>
+      <Paper elevation={2} sx={{
+        p: { xs: 1, sm: 2 },
+        borderRadius: 2,
+        width: '100%',
+        boxSizing: 'border-box',
+        overflow: 'visible',
+        maxHeight: 'none',
+        minHeight: 0,
+      }}>
+        <Typography variant="subtitle1" mb={2} sx={{ fontSize: { xs: '1rem', sm: '1.25rem' } }}>
           Ask AI about <b>{symbol}</b>:
         </Typography>
-        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} justifyContent="center">
+        <Stack
+          direction={{ xs: 'column', sm: 'row' }}
+          spacing={{ xs: 1, sm: 2 }}
+          justifyContent="center"
+          sx={{ width: { xs: '100%', sm: 'auto' } }}
+        >
           {presetQuestions.map((q) => (
             <Button
               key={q}
               variant="contained"
               onClick={() => handleAsk(q)}
               disabled={loading}
+              fullWidth={true}
+              sx={{ width: { xs: '100%', sm: 'auto' } }}
             >
               {q}
             </Button>
