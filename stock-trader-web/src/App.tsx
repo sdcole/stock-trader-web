@@ -1,91 +1,95 @@
 import './App.css'
+import { CssBaseline } from "@mui/material";
 import StockChart from './StockChart';
 import AskAI from './AskAI';
 import CompanyDataGrid from './CompanyDataGrid';
 import { useState } from "react";
-import { ThemeProvider, Container, Box, Paper, useMediaQuery } from "@mui/material";
+import { ThemeProvider, Container, Box, Tab, Tabs, useMediaQuery } from "@mui/material";
 import theme from './theme';
 import PopupOnLoad from './PopupOnLoad';
 
 
 function App() {
-  const isMobile = useMediaQuery('(max-width:800px)');
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [selectedSymbol, setSelectedSymbol] = useState("AAPL");
+  const [mobileTab, setMobileTab] = useState(1);
 
   return (
     <ThemeProvider theme={theme}>
-      <Container maxWidth="lg" sx={{ py: isMobile ? 1 : 4 }}>
-        <Box
-          sx={{
-            display: 'flex',
-            flexDirection: { xs: 'column', md: 'row' },
-            gap: { xs: 2, md: 4 },
-            alignItems: 'flex-start',
-            justifyContent: 'center',
-            minHeight: '100vh',
-          }}
-        >
-          {/* Company List */}
-          <Box
-            sx={{
-              overflow: 'visible',
-              maxHeight: isMobile ? 400 : 600,
-              width: isMobile ? '100%' : 350,
-              maxWidth: isMobile ? '100%' : 350,
-              minWidth: 0,
-              flexShrink: 0,
-              mr: isMobile ? 0 : 4,
-              display: 'flex',
-              flexDirection: 'column',
-            }}
-          >
-            <Paper elevation={2} sx={{ p: isMobile ? 1 : 2.5, pb: isMobile ? 2 : 3, borderRadius: 3, width: '100%', height: '100%', display: 'flex', flexDirection: 'column', boxSizing: 'border-box', overflow: 'hidden' }}>
-              <CompanyDataGrid setSelectedSymbol={setSelectedSymbol} isMobile={isMobile} selectedSymbol={selectedSymbol} />
-            </Paper>
-          </Box>
-          {/* Chart and Ask AI */}
-          <Box flex={2} minWidth={0} sx={{
-            width: isMobile ? '100%' : 0,
-            maxWidth: isMobile ? '100%' : 'calc(100vw - 350px - 64px)',
-            minWidth: 0,
-            overflowX: 'hidden',
-            display: 'flex',
-            flexDirection: 'column',
-          }}>
-            <Paper elevation={2} sx={{
-              p: isMobile ? 1 : 2.5,
-              mb: isMobile ? 2 : 0,
-              minWidth: 0,
-              width: '100%',
-              maxWidth: '100%',
-              borderRadius: 3,
-              boxSizing: 'border-box',
-              display: 'flex',
-              flexDirection: 'column',
-              overflow: 'visible',
-              maxHeight: 'none',
-            }}>
-              <Box sx={{
-                width: '100%',
-                maxWidth: '100%',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'stretch',
-                boxSizing: 'border-box',
-                overflow: 'visible',
-                maxHeight: 'none',
-              }}>
-                <Box sx={{ flex: 1, width: '100%', minWidth: 0, maxWidth: '100%', overflowX: 'visible', display: 'flex', flexDirection: 'column' }}>
-                  <StockChart symbol={selectedSymbol} isMobile={isMobile} />
-                </Box>
-                <Box sx={{ flex: 1, width: '100%', minWidth: 0, maxWidth: '100%', mt: 2, overflowX: 'visible', display: 'flex', flexDirection: 'column' }}>
-                  <AskAI symbol={selectedSymbol} />
-                </Box>
+      <CssBaseline />
+      <Container maxWidth="lg" sx={{ py: isMobile ? 1 : 4, px: isMobile ? 1.5 : 4 }}>
+        {isMobile ? (
+          <Box sx={{ width: '100%', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+            <Tabs
+              value={mobileTab}
+              onChange={(_, v) => setMobileTab(v)}
+              variant="fullWidth"
+              sx={{ mb: 1, borderBottom: '1px solid #2C2C2E' }}
+            >
+              <Tab label="Watchlist" />
+              <Tab label="Chart" />
+            </Tabs>
+
+            {mobileTab === 0 && (
+              <Box sx={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
+                <CompanyDataGrid
+                  setSelectedSymbol={(sym: string) => {
+                    setSelectedSymbol(sym);
+                    setMobileTab(1);
+                  }}
+                  isMobile={isMobile}
+                  selectedSymbol={selectedSymbol}
+                />
               </Box>
-            </Paper>
+            )}
+
+            {mobileTab === 1 && (
+              <Box sx={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
+                <StockChart symbol={selectedSymbol} isMobile={isMobile} />
+                <AskAI symbol={selectedSymbol} isMobile={isMobile} />
+              </Box>
+            )}
+
             <PopupOnLoad />
           </Box>
-        </Box>
+        ) : (
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'row',
+              gap: 3,
+              alignItems: 'flex-start',
+              minHeight: '100vh',
+              pt: 2,
+            }}
+          >
+            <Box
+              sx={{
+                width: 360,
+                maxWidth: 360,
+                flexShrink: 0,
+                position: 'sticky',
+                top: 32,
+                display: 'flex',
+                flexDirection: 'column',
+                maxHeight: 'calc(100vh - 64px)',
+              }}
+            >
+              <CompanyDataGrid setSelectedSymbol={setSelectedSymbol} isMobile={isMobile} selectedSymbol={selectedSymbol} />
+            </Box>
+
+            <Box sx={{
+              flex: 2,
+              minWidth: 0,
+              display: 'flex',
+              flexDirection: 'column',
+            }}>
+              <StockChart symbol={selectedSymbol} isMobile={isMobile} />
+              <AskAI symbol={selectedSymbol} isMobile={isMobile} />
+              <PopupOnLoad />
+            </Box>
+          </Box>
+        )}
       </Container>
     </ThemeProvider>
   )
