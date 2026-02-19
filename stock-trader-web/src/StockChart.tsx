@@ -1,123 +1,213 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { LineChart } from "@mui/x-charts/LineChart";
-import { CircularProgress, Button, Box, Typography, Paper } from "@mui/material";
+import { CircularProgress, Chip, Box, Typography } from "@mui/material";
 
-// Define the structure of stock data
 interface StockData {
     x: string;
     y: number;
 }
 
-// Define props for StockChart
 interface StockChartProps {
     symbol: string;
     isMobile: boolean;
 }
+
+const timeFrameLabels: Record<string, { short: string; long: string }> = {
+    "1d": { short: "1D", long: "Today" },
+    "7d": { short: "1W", long: "Past Week" },
+    "1m": { short: "1M", long: "Past Month" },
+    "3m": { short: "3M", long: "Past 3 Months" },
+    "6m": { short: "6M", long: "Past 6 Months" },
+    "1y": { short: "1Y", long: "Past Year" },
+    "5y": { short: "5Y", long: "Past 5 Years" },
+};
 
 const StockChart: React.FC<StockChartProps> = ({ symbol, isMobile }) => {
     const [data, setData] = useState<StockData[]>([]);
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
     const [timeFrame, setTimeFrame] = useState<string>("7d");
-    const [chartLabel, setChartLabel] = useState<string>("");
-    const [chartLineColor, setChartLineColor] = useState<string>("#48E5C2");
+    const [chartLineColor, setChartLineColor] = useState<string>("#00C805");
+    const [chartWidth, setChartWidth] = useState<number>(0);
+    const chartContainerRef = useRef<HTMLDivElement>(null);
+    const abortControllerRef = useRef<AbortController | null>(null);
 
-    // Theme and media query for responsiveness.
-    const chartHeight = isMobile ? 300 : 300;
+    const chartHeight = isMobile ? 280 : 450;
+
+    // Derived price data
+    const currentPrice = data.length > 0 ? data[data.length - 1].y : 0;
+    const startPrice = data.length > 0 ? data[0].y : 0;
+    const yValues = data.map(d => d.y);
+    const yMin = data.length > 0 ? Math.min(...yValues) : 0;
+    const yMax = data.length > 0 ? Math.max(...yValues) : 0;
+    const yRange = yMax - yMin;
+    const yPadding = yRange > 0 ? yRange * 0.1 : yMax * 0.001;
+    const yAxisMin = yMin - yPadding;
+    const yAxisMax = yMax + yPadding;
+    const priceChange = currentPrice - startPrice;
+    const percentChange = startPrice !== 0 ? (priceChange / startPrice) * 100 : 0;
+    const isPositive = priceChange >= 0;
 
     useEffect(() => {
-        fetchStockData(timeFrame);
+        const el = chartContainerRef.current;
+        if (!el) return;
+        const observer = new ResizeObserver((entries) => {
+            const width = entries[0]?.contentRect.width;
+            if (width) setChartWidth(Math.floor(width));
+        });
+        observer.observe(el);
+        return () => observer.disconnect();
+    }, []);
+
+    useEffect(() => {
+        // Abort any in-flight request before starting a new one
+        abortControllerRef.current?.abort();
+        const controller = new AbortController();
+        abortControllerRef.current = controller;
+
+        fetchStockData(timeFrame, controller.signal);
+
+        return () => controller.abort();
     }, [timeFrame, symbol]);
 
-    const fetchStockData = async (selectedTimeFrame: string) => {
+    const fetchStockData = async (selectedTimeFrame: string, signal: AbortSignal) => {
         setLoading(true);
         try {
-            setChartLabel(symbol);
             setError(null);
-            setTimeFrame(selectedTimeFrame);
 
             const response = await axios.get<StockData[]>("https://trade.meshservice.work/api/trade/v1/line-graph", {
                 params: { symbol, timeframe: selectedTimeFrame },
+                signal,
             });
 
             if (response.data && Array.isArray(response.data)) {
-                const transformedData: StockData[] = response.data.map((bar: any) => ({
-                    x: selectedTimeFrame === "1d" || selectedTimeFrame === "7d" || selectedTimeFrame === "1m" || selectedTimeFrame === "3m"
-                        ? new Date(bar.timestamp).toLocaleString()
-                        : new Date(bar.timestamp).toLocaleDateString(),
-                    y: bar.vw as number,
-                }));
+                const transformedData: StockData[] = response.data.map((bar: any) => {
+                    const date = new Date(bar.timestamp);
+                    let label: string;
+                    if (selectedTimeFrame === "1d") {
+                        // Minute data — label by time so each minute is a unique x position
+                        label = date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+                    } else if (selectedTimeFrame === "7d") {
+                        // Minute data spanning multiple days — include date + time for uniqueness
+                        label = date.toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+                    } else if (selectedTimeFrame === "1m") {
+                        label = date.toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+                    } else if (selectedTimeFrame === "3m") {
+                        label = date.toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+                    } else {
+                        label = date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: '2-digit' });
+                    }
+                    return { x: label, y: bar.vw as number };
+                });
 
                 setData(transformedData);
-                if (transformedData[0].y <= transformedData[transformedData.length-1].y) {
-                    setChartLineColor("#48E5C2");
-                }
-                else {
-                    setChartLineColor("#DA2C38");
-                }
-                console.log(transformedData);
+                setChartLineColor(
+                    transformedData[0].y <= transformedData[transformedData.length - 1].y
+                        ? "#00C805"
+                        : "#FF5252"
+                );
             } else {
                 setError("No data available for the specified symbol.");
             }
         } catch (err) {
+            if (axios.isCancel(err)) return; // Request was superseded, ignore silently
             setError("Error fetching data. Check the symbol or try again.");
             console.error(err);
         } finally {
-            setLoading(false);
+            if (!signal.aborted) setLoading(false);
         }
     };
 
     return (
-            <Paper sx={{ width: "100%", p: 3, borderRadius: 3 }}>
-                <Typography variant="h5" color="primary" gutterBottom>
-                    Stock Price Chart
+        <Box sx={{ width: "100%", p: isMobile ? 1.5 : 3, boxSizing: 'border-box' }}>
+            {/* Hero Price Display */}
+            <Box sx={{ textAlign: 'left', mb: 2 }}>
+                <Typography variant="subtitle2" sx={{ color: '#9E9E9E', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+                    {symbol}
                 </Typography>
-
-                {/* Time Frame Buttons */}
-                <Box sx={{ display: "flex", justifyContent: "center", gap: 1, mb: 2, flexWrap: "wrap" }}>
-                    {["1d", "7d", "1m", "3m", "6m", "1y", "5y"].map((frame) => (
-                        <Button
-                            key={frame}
-                            variant={timeFrame === frame ? "contained" : "outlined"}
-                            color="primary"
-                            onClick={() => setTimeFrame(frame)}
-                            sx={{ minWidth: 80 }}
-                        >
-                            {frame === "1d" ? "1 Day" :
-                                frame === "7d" ? "7 Days" :
-                                    frame === "1m" ? "1 Month" :
-                                        frame === "3m" ? "3 Months" :
-                                            frame === "6m" ? "6 Months" :
-                                                frame === "1y" ? "1 Year": "5 Years"
-                                                }
-                        </Button>
-                    ))}
-                </Box>
-
-                {/* Error Message */}
-                {error && <Typography color="error">{error}</Typography>}
-
-                {/* Loading Spinner */}
-                {loading && (
-                    <Box sx={{ display: "flex", justifyContent: "center", my: 3 }}>
-                        <CircularProgress color="primary" />
-                    </Box>
+                {data.length > 0 && (
+                    <>
+                        <Typography variant="h4" sx={{ color: '#FFFFFF', fontWeight: 700, my: 0.5 }}>
+                            ${currentPrice.toFixed(2)}
+                        </Typography>
+                        <Typography variant="subtitle1" sx={{ color: isPositive ? '#00C805' : '#FF5252' }}>
+                            {isPositive ? '+' : ''}{priceChange.toFixed(2)} ({isPositive ? '+' : ''}{percentChange.toFixed(2)}%)
+                            <Box component="span" sx={{ color: '#9E9E9E', ml: 1, fontSize: '0.8125rem' }}>
+                                {timeFrameLabels[timeFrame].long}
+                            </Box>
+                        </Typography>
+                    </>
                 )}
+            </Box>
 
-                {/* Line Chart */}
-                {!loading && data.length > 0 && (
-                    <Box sx={{ width: '100%', overflowX: 'hidden', display: 'block' }}>
-                        <LineChart
-                            xAxis={[{ data: data.map((d) => d.x), scaleType: "point" }]}
-                            series={[{ data: data.map((d) => d.y), label: chartLabel, color: chartLineColor, showMark: false }]}
-                            width={undefined}
-                            height={chartHeight}
-                            sx={{ width: '100%' }}
-                        />
+            {error && <Typography color="error" sx={{ mb: 1 }}>{error}</Typography>}
+
+            {/* Chart area */}
+            <Box ref={chartContainerRef} sx={{ width: '100%', mx: -1 }}>
+                {loading ? (
+                    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: chartHeight }}>
+                        <CircularProgress size={32} />
                     </Box>
-                )}
-            </Paper>
+                ) : data.length > 0 && chartWidth > 0 ? (
+                    <LineChart
+                        xAxis={[{
+                            data: data.map((d) => d.x),
+                            scaleType: "point",
+                        }]}
+                        yAxis={[{ min: yAxisMin, max: yAxisMax }]}
+                        leftAxis={null}
+                        bottomAxis={null}
+                        series={[{
+                            data: data.map((d) => d.y),
+                            color: chartLineColor,
+                            showMark: false,
+                            area: true,
+                            curve: "catmullRom",
+                        }]}
+                        grid={{ vertical: false, horizontal: false }}
+                        width={chartWidth + 16}
+                        height={chartHeight}
+                        margin={{ top: 10, right: 0, bottom: 10, left: 0 }}
+                        slotProps={{ legend: { hidden: true } }}
+                        sx={{
+                            '& .MuiAreaElement-root': {
+                                fill: chartLineColor,
+                                opacity: 0.08,
+                            },
+                            '& .MuiChartsAxis-root': {
+                                display: 'none',
+                            },
+                        }}
+                    />
+                ) : null}
+            </Box>
+
+            {/* Time Frame Pills */}
+            <Box sx={{ display: 'flex', justifyContent: 'flex-start', gap: 0.5, mt: 1.5, pl: 1 }}>
+                {Object.keys(timeFrameLabels).map((frame) => (
+                    <Chip
+                        key={frame}
+                        label={timeFrameLabels[frame].short}
+                        size="small"
+                        onClick={() => setTimeFrame(frame)}
+                        sx={{
+                            borderRadius: '16px',
+                            fontWeight: 600,
+                            fontSize: '0.75rem',
+                            px: 0.5,
+                            bgcolor: timeFrame === frame ? 'rgba(0,200,5,0.15)' : 'transparent',
+                            color: timeFrame === frame ? '#00C805' : '#9E9E9E',
+                            border: 'none',
+                            cursor: 'pointer',
+                            '&:hover': {
+                                bgcolor: timeFrame === frame ? 'rgba(0,200,5,0.2)' : 'rgba(255,255,255,0.05)',
+                            },
+                        }}
+                    />
+                ))}
+            </Box>
+        </Box>
     );
 };
 
